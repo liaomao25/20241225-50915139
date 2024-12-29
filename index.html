@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>雲林度假村與遊樂園</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        /* 主要背景與園區風格設計 */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-image: url('https://res.klook.com/image/upload/c_fill,w_720,h_500,f_auto/w_80,x_15,y_15,g_south_west,l_klook_water/activities/w22bbyona1ccuuyuqamj.webp'); /* 這裡更換成園區主題圖片 */
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+            transition: background 0.5s ease-in-out;
+        }
+
+        header {
+            background: rgba(0, 123, 255, 0.7); /* 使用半透明背景增強視覺效果 */
+        }
+
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.8); /* 半透明的導航欄背景 */
+        }
+
+        .navbar-brand, .nav-link {
+            color: #000 !important; /* 設置字體顏色 */
+        }
+
+        .btn-primary {
+            background-color: #ff9f00;
+            border-color: #ff9f00;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #ff6f00;
+            border-color: #ff6f00;
+        }
+
+        /* 功能區塊設計 */
+        .section {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 40px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+
+        .section h2 {
+            font-size: 2rem;
+            color: #ff9f00;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+        }
+
+        .alert {
+            font-size: 1.2rem;
+            border-radius: 10px;
+        }
+
+        footer {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            color: #fff;
+        }
+
+        .navbar-nav .nav-item {
+            margin-left: 20px;
+        }
+
+        .navbar-toggler-icon {
+            background-color: #000;
+        }
+
+        .navbar-toggler {
+            border: none;
+        }
+
+        /* 增加動態效果 */
+        .navbar, .section, footer {
+            transition: transform 0.3s ease;
+        }
+
+        .fade-in {
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        /* 園區元素設計（如按鈕、圖片等） */
+        .park-icon {
+            width: 60px;
+            height: 60px;
+            margin-top: 10px;
+        }
+        
+        .park-logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ff9f00;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+        }
+
+    </style>
+    <script>
+        // 假設電子錢包餘額
+        let walletBalance = 1000;  // 初始餘額 1000 元
+        let transactionHistory = [];
+
+        // RFID 驗證與支付功能
+        function checkRFID() {
+            const rfid = document.getElementById("rfidInput").value;
+            const resultDiv = document.getElementById("rfidResult");
+
+            if (rfid === "") {
+                resultDiv.innerHTML = "<div class='alert alert-danger' role='alert'>請輸入 RFID 編號！</div>";
+                speak("請輸入 RFID 編號");
+            } else {
+                resultDiv.innerHTML = "<div class='alert alert-success' role='alert'>驗票成功！歡迎進入園區！</div>";
+                speak("驗票成功，歡迎進入園區");
+            }
+        }
+
+        function processPayment() {
+            const walletRfid = document.getElementById("walletRfidInput").value;
+            const amount = parseFloat(document.getElementById("paymentAmount").value);
+            const resultDiv = document.getElementById("paymentResult");
+
+            if (walletRfid === "" || isNaN(amount) || amount <= 0) {
+                resultDiv.innerHTML = "<div class='alert alert-danger' role='alert'>請輸入有效的 RFID 編號和金額！</div>";
+                speak("請輸入有效的 RFID 編號和金額");
+            } else if (amount > walletBalance) {
+                resultDiv.innerHTML = "<div class='alert alert-danger' role='alert'>餘額不足，無法支付！</div>";
+                speak("餘額不足，無法支付");
+            } else {
+                walletBalance -= amount;
+                transactionHistory.push(`消費：${amount} 元`);
+                resultDiv.innerHTML = `<div class='alert alert-success' role='alert'>支付成功！已扣除金額：${amount} 元。當前餘額：${walletBalance} 元。</div>`;
+                speak(`支付成功，已扣除金額：${amount} 元。當前餘額：${walletBalance} 元`);
+                updateBalance();
+                updateTransactionHistory();
+            }
+        }
+
+        function topUp() {
+            const topUpAmount = parseFloat(document.getElementById("topUpAmount").value);
+            const resultDiv = document.getElementById("topUpResult");
+
+            if (isNaN(topUpAmount) || topUpAmount <= 0) {
+                resultDiv.innerHTML = "<div class='alert alert-danger' role='alert'>請輸入有效的儲值金額！</div>";
+                speak("請輸入有效的儲值金額");
+            } else {
+                walletBalance += topUpAmount;
+                transactionHistory.push(`儲值：${topUpAmount} 元`);
+                resultDiv.innerHTML = `<div class='alert alert-success' role='alert'>儲值成功！已儲值金額：${topUpAmount} 元。當前餘額：${walletBalance} 元。</div>`;
+                speak(`儲值成功，已儲值金額：${topUpAmount} 元。當前餘額：${walletBalance} 元`);
+                updateBalance();
+                updateTransactionHistory();
+            }
+        }
+
+        function updateBalance() {
+            document.getElementById("currentBalance").innerText = `當前餘額：${walletBalance} 元`;
+        }
+
+        function updateTransactionHistory() {
+            const transactionList = document.getElementById("transactionHistory");
+            transactionList.innerHTML = "";
+            transactionHistory.forEach((transaction, index) => {
+                const li = document.createElement("li");
+                li.classList.add("list-group-item");
+                li.innerText = transaction;
+                transactionList.appendChild(li);
+            });
+        }
+
+        // 語音播報功能
+        function speak(text) {
+            const speech = new SpeechSynthesisUtterance();
+            speech.text = text;
+            speech.lang = 'zh-TW'; // 設置語言為中文
+            speech.volume = 1; // 音量
+            speech.rate = 1; // 語速
+            speech.pitch = 1; // 音高
+            window.speechSynthesis.speak(speech);
+        }
+    </script>
+</head>
+<body class="fade-in">
+    <!-- 導航欄 -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">雲林度假村與遊樂園</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">首頁</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#entry">門禁驗票</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#payment">消費支付</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#topup">儲值</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#balance">查詢餘額</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#transactions">交易紀錄</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 首頁 -->
+    <header class="bg-primary text-white text-center py-5">
+        <h1>歡迎來到雲林度假村與遊樂園</h1>
+        <p>體驗智慧化遊玩與便捷的消費服務</p>
+        <img src="https://play-lh.googleusercontent.com/Y5KL71adt-8xXSo6shZzW09fM0gXaYT2YjEMzd_0Tab9Qk07nW25U_DQPN0H5A4BJ90l" alt="遊樂設施" class="park-icon"> <!-- 園區相關圖片 -->
+    </header>
+
+    <!-- 門禁驗票區 -->
+    <section id="entry" class="py-5 container section">
+        <h2 class="text-center">門禁驗票</h2>
+        <p class="text-center">請輸入您的 RFID 門票編號以進行驗票。</p>
+        <div class="mb-3">
+            <input type="text" class="form-control" id="rfidInput" placeholder="請輸入 RFID 編號">
+        </div>
+        <button class="btn btn-primary" onclick="checkRFID()">驗票</button>
+        <div id="rfidResult" class="mt-3"></div>
+    </section>
+
+    <!-- 消費支付區 -->
+    <section id="payment" class="py-5 bg-light section">
+        <div class="container">
+            <h2 class="text-center">消費支付</h2>
+            <p class="text-center">使用您的電子錢包完成園區內消費。</p>
+            <div class="mb-3">
+                <input type="text" class="form-control" id="walletRfidInput" placeholder="請輸入 RFID 編號">
+            </div>
+            <div class="mb-3">
+                <input type="number" class="form-control" id="paymentAmount" placeholder="請輸入扣款金額">
+            </div>
+            <button class="btn btn-primary" onclick="processPayment()">扣款</button>
+            <div id="paymentResult" class="mt-3"></div>
+        </div>
+    </section>
+
+    <!-- 儲值區 -->
+    <section id="topup" class="py-5 section">
+        <div class="container">
+            <h2 class="text-center">儲值</h2>
+            <p class="text-center">為您的電子錢包儲值更多金額。</p>
+            <div class="mb-3">
+                <input type="number" class="form-control" id="topUpAmount" placeholder="請輸入儲值金額">
+            </div>
+            <button class="btn btn-primary" onclick="topUp()">儲值</button>
+            <div id="topUpResult" class="mt-3"></div>
+        </div>
+    </section>
+
+    <!-- 查詢餘額區 -->
+    <section id="balance" class="py-5 bg-light section">
+        <div class="container">
+            <h2 class="text-center">查詢餘額</h2>
+            <p class="text-center" id="currentBalance">當前餘額：${walletBalance} 元</p>
+        </div>
+    </section>
+
+    <!-- 交易紀錄區 -->
+    <section id="transactions" class="py-5 section">
+        <div class="container">
+            <h2 class="text-center">交易紀錄</h2>
+            <ul id="transactionHistory" class="list-group">
+                <!-- 交易紀錄將動態顯示在這裡 -->
+            </ul>
+        </div>
+    </section>
+
+    <!-- 底部 -->
+    <footer class="text-center py-4 bg-dark text-white">
+        <p>© 2024 雲林度假村與遊樂園. 版權所有.</p>
+    </footer>
+</body>
+</html>
